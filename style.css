@@ -1,0 +1,45 @@
+body {
+  background: radial-gradient(circle, #1a001a, #000);
+  color: white;
+  font-family: 'Poppins', sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 20px;
+}
+
+h1 {
+  color: #ff6600;
+  text-shadow: 0 0 10px #ff3300;
+}
+
+#connectWallet {
+  padding: 10px 20px;
+  background-color: #ff6600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  color: white;
+  font-size: 16px;
+  box-shadow: 0 0 10px #ff3300;
+}
+
+#pumpkinContainer {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.pumpkin {
+  width: 80px;
+  height: 80px;
+  background-image: url('https://i.imgur.com/mBkaXwA.png');
+  background-size: cover;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.pumpkin:hover {
+  transform: scale(1.1);
+}
