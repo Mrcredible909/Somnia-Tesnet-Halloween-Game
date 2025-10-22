@@ -1,40 +1,43 @@
-const connectWalletButton = document.getElementById("connectWallet");
-const gameArea = document.getElementById("gameArea");
-const pumpkinContainer = document.getElementById("pumpkinContainer");
-const scoreDisplay = document.getElementById("score");
+// Somnia Halloween Game Script
+console.log("🎃 Somnia Halloween Game Loaded!");
 
-let score = 0;
+// Simulasi login wallet
+async function connectWallet() {
+    alert("🔗 Connecting to Somnia Wallet (Testnet)...");
+    // Simulasi wallet address
+    const walletAddress = "0x" + Math.random().toString(16).substr(2, 8);
+    localStorage.setItem("wallet", walletAddress);
+    document.getElementById("wallet").innerText = "Connected: " + walletAddress;
+}
 
-connectWalletButton.addEventListener("click", async () => {
-  if (window.ethereum) {
-    try {
-      await window.ethereum.request({ method: "eth_requestAccounts" });
-      connectWalletButton.style.display = "none";
-      gameArea.style.display = "block";
-      generatePumpkins();
-    } catch (error) {
-      alert("Wallet connection failed!");
-    }
-  } else {
-    alert("Please install MetaMask!");
-  }
-});
+// Leaderboard dummy (sementara)
+const leaderboard = [];
 
-function generatePumpkins() {
-  pumpkinContainer.innerHTML = "";
-  const correctIndex = Math.floor(Math.random() * 5);
-  for (let i = 0; i < 5; i++) {
-    const pumpkin = document.createElement("div");
-    pumpkin.classList.add("pumpkin");
-    pumpkin.addEventListener("click", () => {
-      if (i === correctIndex) {
-        score++;
-        scoreDisplay.textContent = `Your score: ${score}`;
-        generatePumpkins();
-      } else {
-        alert("Wrong pumpkin! Try again...");
-      }
+function addScore(player, score) {
+    leaderboard.push({ player, score });
+    leaderboard.sort((a, b) => b.score - a.score);
+    updateLeaderboard();
+}
+
+function updateLeaderboard() {
+    const board = document.getElementById("leaderboard");
+    board.innerHTML = "";
+    leaderboard.forEach((entry, index) => {
+        const row = document.createElement("p");
+        row.textContent = `${index + 1}. ${entry.player} — ${entry.score} pts`;
+        board.appendChild(row);
     });
-    pumpkinContainer.appendChild(pumpkin);
-  }
+}
+
+// Simulasi permainan
+function playGame() {
+    const wallet = localStorage.getItem("wallet");
+    if (!wallet) {
+        alert("Please connect your wallet first!");
+        return;
+    }
+
+    const score = Math.floor(Math.random() * 100);
+    addScore(wallet, score);
+    alert(`👻 You scored ${score} points!`);
 }
