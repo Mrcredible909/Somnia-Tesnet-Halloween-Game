@@ -25,10 +25,36 @@
             font-size: 1.2rem;
             color: #ffcc80;
         }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            background: orange;
+            border: none;
+            border-radius: 8px;
+            color: black;
+            cursor: pointer;
+            box-shadow: 0 0 10px #ff6600;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #ffcc80;
+        }
     </style>
 </head>
 <body>
     <h1>🎃 Somnia Halloween Game 🎃</h1>
     <p>Prepare for a spooky experience on Somnia Network Testnet...</p>
+
+    <button onclick="connectWallet()">Connect Wallet</button>
+    <button onclick="playGame()">Play Game</button>
+
+    <h2>Leaderboard</h2>
+    <div id="leaderboard"></div>
+    <p id="wallet"></p>
+
+    <script src="script.js"></script>
 </body>
 </html>
+
+
