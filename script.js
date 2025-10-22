@@ -1,22 +1,40 @@
-// Somnia Halloween Game Script
-console.log("🎃 Somnia Halloween Game Loaded!");
+// 🎃 Somnia Halloween Game - Web3 Version
+console.log("Somnia Halloween Game loaded...");
 
-// Simulasi login wallet
+let walletAddress = null;
+
+// Connect wallet using MetaMask
 async function connectWallet() {
-    alert("🔗 Connecting to Somnia Wallet (Testnet)...");
-    // Simulasi wallet address
-    const walletAddress = "0x" + Math.random().toString(16).substr(2, 8);
-    localStorage.setItem("wallet", walletAddress);
-    document.getElementById("wallet").innerText = "Connected: " + walletAddress;
+    if (typeof window.ethereum !== "undefined") {
+        try {
+            const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+            walletAddress = accounts[0];
+            document.getElementById("wallet").innerText = "Connected: " + walletAddress;
+            alert("🎃 Wallet connected: " + walletAddress);
+        } catch (error) {
+            alert("Connection rejected!");
+            console.error(error);
+        }
+    } else {
+        alert("MetaMask not found! Please install it to play.");
+    }
 }
 
-// Leaderboard dummy (sementara)
-const leaderboard = [];
+// Leaderboard (temporary local)
+let leaderboard = [];
 
-function addScore(player, score) {
-    leaderboard.push({ player, score });
+function playGame() {
+    if (!walletAddress) {
+        alert("Please connect your wallet first!");
+        return;
+    }
+
+    const score = Math.floor(Math.random() * 100);
+    leaderboard.push({ player: walletAddress, score });
     leaderboard.sort((a, b) => b.score - a.score);
+
     updateLeaderboard();
+    alert(`👻 You scored ${score} points!`);
 }
 
 function updateLeaderboard() {
@@ -27,17 +45,4 @@ function updateLeaderboard() {
         row.textContent = `${index + 1}. ${entry.player} — ${entry.score} pts`;
         board.appendChild(row);
     });
-}
-
-// Simulasi permainan
-function playGame() {
-    const wallet = localStorage.getItem("wallet");
-    if (!wallet) {
-        alert("Please connect your wallet first!");
-        return;
-    }
-
-    const score = Math.floor(Math.random() * 100);
-    addScore(wallet, score);
-    alert(`👻 You scored ${score} points!`);
 }
