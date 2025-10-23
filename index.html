@@ -6,172 +6,227 @@
   <title>🎃 Somnia Halloween Game 🎃</title>
   <style>
     body {
-      margin: 0;
       font-family: 'Poppins', sans-serif;
-      background: radial-gradient(circle at center, #2e003e, #0a0012);
+      background: radial-gradient(circle at top, #0a0a0a, #111, #000);
       color: #fff;
       text-align: center;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
+      margin: 0;
+      padding: 40px;
+      overflow-x: hidden;
     }
 
     h1 {
-      font-size: 2.5rem;
-      text-shadow: 0 0 25px orange, 0 0 50px red;
+      color: #ff6600;
+      text-shadow: 0 0 15px #ff6600, 0 0 30px #ff3300;
+      font-size: 2.7em;
     }
 
-    p {
-      font-size: 1.1rem;
-      color: #ffcc80;
+    #wallet {
+      margin: 10px 0;
+      color: #00ffff;
+      font-weight: bold;
     }
 
     button {
-      background: linear-gradient(135deg, #ff6600, #cc3300);
+      background: linear-gradient(90deg, #ff6600, #ff00ff);
       border: none;
-      border-radius: 10px;
-      padding: 10px 20px;
-      margin: 10px;
-      font-size: 1rem;
-      color: white;
+      padding: 12px 25px;
+      border-radius: 30px;
       cursor: pointer;
-      transition: all 0.2s ease-in-out;
-      box-shadow: 0 0 10px #ff6600;
+      color: #fff;
+      font-size: 1em;
+      margin: 10px;
+      transition: all 0.3s;
+      font-weight: bold;
+      text-transform: uppercase;
     }
 
     button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 20px #ff9900;
+      transform: scale(1.08);
+      box-shadow: 0 0 20px #ff6600;
     }
 
     #leaderboard {
-      margin-top: 20px;
-      border: 1px solid #ff6600;
-      border-radius: 10px;
-      padding: 10px;
-      width: 80%;
-      max-width: 600px;
-      text-align: left;
-      background: rgba(255, 102, 0, 0.1);
+      margin-top: 40px;
+      padding: 20px;
+      border: 2px solid #ff6600;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      box-shadow: 0 0 30px #ff660088;
     }
 
-    .wallet {
-      margin-top: 20px;
-      font-weight: bold;
+    #leaderboard h3 {
+      color: #ff00ff;
+      text-shadow: 0 0 15px #ff00ff;
+    }
+
+    #leaderboard p {
+      font-size: 1.1em;
+      color: #fff;
+      margin: 5px 0;
+      text-shadow: 0 0 5px #ff6600;
+    }
+
+    #pumpkin {
+      margin: 30px auto;
+      width: 160px;
+      height: 160px;
+      background: url('https://i.ibb.co/d7DhWQv/pumpkin.png') no-repeat center;
+      background-size: contain;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    #pumpkin:active {
+      transform: scale(0.9);
+    }
+
+    #score {
+      font-size: 1.3em;
+      color: #00ff99;
+      margin-top: 10px;
+      text-shadow: 0 0 8px #00ff99;
     }
   </style>
 </head>
 <body>
   <h1>🎃 Somnia Halloween Game 🎃</h1>
-  <p>Connect your wallet to Somnia Testnet and play the spooky pumpkin experiment!</p>
+  <p>Connect wallet, click the pumpkin, and climb the leaderboard!</p>
 
-  <div>
-    <button onclick="connectWallet()">Connect Wallet</button>
-    <button onclick="startGame()">Start Game</button>
-    <button onclick="submitScore()">Submit Score</button>
-    <button onclick="loadLeaderboard()">Load Leaderboard</button>
-  </div>
+  <div id="wallet">Wallet not connected</div>
+  <button onclick="connectWallet()">Connect Wallet</button>
+
+  <div id="pumpkin" onclick="clickPumpkin()"></div>
+  <div id="score">Your Score: 0</div>
+
+  <button onclick="submitScore()">Submit Score</button>
+  <button onclick="loadLeaderboard()">Load Leaderboard</button>
 
   <div id="leaderboard">
-    <h2>🏆 Leaderboard</h2>
-    <div id="leaderboardData">No data yet...</div>
+    <h3>🏆 Leaderboard 🏆</h3>
+    <p>No scores yet...</p>
   </div>
 
-  <p class="wallet" id="wallet">Wallet: Not Connected</p>
+  <!-- Ethers.js -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
 
   <script>
-    const CHAIN_ID_HEX = "0xc478"; // 50312 in hex
-    const CHAIN_PARAMS = {
-      chainId: CHAIN_ID_HEX,
-      chainName: "Somnia Testnet",
-      nativeCurrency: {
-        name: "Somnia Test Token",
-        symbol: "STT",
-        decimals: 18
-      },
-      rpcUrls: ["https://dream-rpc.somnia.network/"],
-      blockExplorerUrls: ["https://shannon-explorer.somnia.network/"]
-    };
+    // === NETWORK CONFIG ===
+    const CHAIN_ID_DEC = 50312;
+    const CHAIN_ID_HEX = "0xC508";
+    const CONTRACT_ADDRESS = "0x6454Bb18d3161897905Ff9c662d74df06821C14F"; // ganti setelah deploy
+    const RPC_URL = "https://dream-rpc.somnia.network/";
 
-    let userWallet = null;
+    // === CONTRACT ABI (contoh leaderboard sederhana) ===
+    const CONTRACT_ABI = [
+      {
+        "inputs": [
+          {"internalType": "string","name": "_name","type": "string"},
+          {"internalType": "uint256","name": "_score","type": "uint256"}
+        ],
+        "name": "addScore",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "getTopPlayers",
+        "outputs": [
+          {
+            "components": [
+              {"internalType": "string","name": "name","type": "string"},
+              {"internalType": "uint256","name": "score","type": "uint256"}
+            ],
+            "internalType": "struct Player[]",
+            "name": "",
+            "type": "tuple[]"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ];
+
+    let provider, signer, contract;
+    let currentScore = 0;
 
     async function connectWallet() {
-      if (typeof window.ethereum === "undefined") {
-        alert("MetaMask not detected. Please install MetaMask.");
-        return;
-      }
+      if (typeof window.ethereum !== "undefined") {
+        try {
+          const chainId = await ethereum.request({ method: "eth_chainId" });
 
-      try {
-        // Switch or add Somnia Testnet
-        await window.ethereum.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: CHAIN_ID_HEX }]
-        });
-      } catch (switchError) {
-        if (switchError.code === 4902) {
-          await window.ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [CHAIN_PARAMS]
-          });
-        } else {
-          alert("Failed to switch chain: " + switchError.message);
-          return;
+          // Jika bukan Somnia Testnet, ubah jaringan otomatis
+          if (chainId !== CHAIN_ID_HEX) {
+            await ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [{
+                chainId: CHAIN_ID_HEX,
+                chainName: "Somnia Testnet",
+                nativeCurrency: {
+                  name: "Somnia Test Token",
+                  symbol: "STT",
+                  decimals: 18
+                },
+                rpcUrls: [RPC_URL],
+                blockExplorerUrls: ["https://shannon-explorer.somnia.network/"]
+              }]
+            });
+          }
+
+          await ethereum.request({ method: "eth_requestAccounts" });
+          provider = new ethers.providers.Web3Provider(window.ethereum);
+          signer = provider.getSigner();
+          contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+          const walletAddress = await signer.getAddress();
+          document.getElementById("wallet").innerText = `Connected: ${walletAddress}`;
+          alert("✅ Wallet connected to Somnia Testnet!");
+        } catch (err) {
+          console.error(err);
+          alert("❌ Failed to connect wallet.");
         }
+      } else {
+        alert("Please install MetaMask first.");
       }
+    }
+
+    function clickPumpkin() {
+      currentScore += Math.floor(Math.random() * 10) + 1;
+      document.getElementById("score").innerText = `Your Score: ${currentScore}`;
+    }
+
+    async function submitScore() {
+      if (!contract) return alert("Please connect your wallet first.");
+      const name = prompt("Enter your player name:");
+      if (!name) return;
 
       try {
-        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-        userWallet = accounts[0];
-        document.getElementById("wallet").innerText = "Wallet: " + userWallet;
-        alert("Wallet connected: " + userWallet);
+        const tx = await contract.addScore(name, currentScore);
+        await tx.wait();
+        alert(`🎃 Score submitted! ${name}: ${currentScore}`);
+        currentScore = 0;
+        document.getElementById("score").innerText = `Your Score: 0`;
+        loadLeaderboard();
       } catch (err) {
-        alert("Failed to connect wallet: " + err.message);
+        console.error(err);
+        alert("Error submitting score.");
       }
     }
 
-    function startGame() {
-      if (!userWallet) {
-        alert("Please connect your wallet first!");
-        return;
-      }
-      alert("🎃 Game Started! Smash the pumpkins and earn your spooky score!");
-    }
+    async function loadLeaderboard() {
+      if (!contract) return alert("Please connect your wallet first.");
+      try {
+        const players = await contract.getTopPlayers();
+        const board = document.getElementById("leaderboard");
+        board.innerHTML = "<h3>🏆 Leaderboard 🏆</h3>";
 
-    function submitScore() {
-      if (!userWallet) {
-        alert("Connect your wallet first!");
-        return;
+        players.forEach((p, i) => {
+          board.innerHTML += `<p>${i + 1}. ${p.name} — ${p.score}</p>`;
+        });
+      } catch (err) {
+        console.error(err);
       }
-      const randomScore = Math.floor(Math.random() * 1000);
-      localStorage.setItem(userWallet, randomScore);
-      alert("Score submitted: " + randomScore);
-    }
-
-    function loadLeaderboard() {
-      const leaderboard = document.getElementById("leaderboardData");
-      leaderboard.innerHTML = "";
-      for (let i = 0; i < localStorage.length; i++) {
-        const wallet = localStorage.key(i);
-        const score = localStorage.getItem(wallet);
-        const entry = document.createElement("div");
-        entry.textContent = `${i + 1}. ${wallet.slice(0, 6)}...${wallet.slice(-4)} - ${score} pts`;
-        leaderboard.appendChild(entry);
-      }
-      if (localStorage.length === 0) {
-        leaderboard.innerHTML = "No scores yet...";
-      }
-    }
-
-    // Auto update wallet if user changes in MetaMask
-    if (window.ethereum) {
-      window.ethereum.on("accountsChanged", (accounts) => {
-        userWallet = accounts[0] || null;
-        document.getElementById("wallet").innerText = userWallet
-          ? "Wallet: " + userWallet
-          : "Wallet: Not Connected";
-      });
     }
   </script>
 </body>
