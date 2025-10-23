@@ -3,206 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Somnia Testnet Leaderboard 🎃</title>
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: radial-gradient(circle at top, #0a0a0a, #111, #000);
-      color: #fff;
-      text-align: center;
-      margin: 0;
-      padding: 40px;
-      overflow-x: hidden;
-    }
-
-    h1 {
-      color: #ff00ff;
-      text-shadow: 0 0 10px #ff00ff, 0 0 25px #ff00ff;
-      font-size: 2.5em;
-      margin-bottom: 10px;
-    }
-
-    #wallet {
-      margin: 10px 0;
-      color: #00ffff;
-      font-weight: bold;
-      text-shadow: 0 0 5px #00ffff;
-    }
-
-    button {
-      background: linear-gradient(90deg, #ff00ff, #00ffff);
-      border: none;
-      padding: 12px 25px;
-      border-radius: 30px;
-      cursor: pointer;
-      color: #000;
-      font-size: 1em;
-      margin: 10px;
-      transition: all 0.3s;
-      font-weight: bold;
-      text-transform: uppercase;
-      box-shadow: 0 0 10px #ff00ff99;
-    }
-
-    button:hover {
-      transform: scale(1.08);
-      box-shadow: 0 0 25px #00ffff;
-    }
-
-    #leaderboard {
-      margin-top: 30px;
-      padding: 20px;
-      border: 2px solid #ff00ff;
-      border-radius: 20px;
-      background: rgba(255, 255, 255, 0.05);
-      box-shadow: 0 0 30px #ff00ff44;
-      width: 80%;
-      max-width: 500px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    #leaderboard h3 {
-      color: #00ffff;
-      text-shadow: 0 0 10px #00ffff;
-    }
-
-    #leaderboard p {
-      font-size: 1.1em;
-      color: #fff;
-      margin: 5px 0;
-      text-shadow: 0 0 5px #ff00ff;
-    }
-
-    footer {
-      margin-top: 50px;
-      font-size: 0.9em;
-      color: #aaa;
-    }
-  </style>
-</head>
-
-<body>
-  <h1>Somnia Testnet Leaderboard 🎃</h1>
-  <div id="wallet">Wallet not connected</div>
-
-  <button onclick="connectWallet()">Connect Wallet</button>
-  <button onclick="addScore()">Add Random Score</button>
-  <button onclick="loadLeaderboard()">Load Leaderboard</button>
-
-  <div id="leaderboard">
-    <h3>🏆 Leaderboard 🏆</h3>
-    <p>No data yet</p>
-  </div>
-
-  <footer>
-    <p>Powered by <strong>Somnia Shannon Testnet</strong></p>
-  </footer>
-
-  <!-- Library Ethers.js -->
+  <title>🎃 Somnia Halloween Game 🎃</title>
+  <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
+</head>
+<body>
+  <h1>🎃 Somnia Halloween Game 🎃</h1>
+  <p>Connect your wallet to Somnia Testnet and play the spooky pumpkin experiment!</p>
 
-  <script>
-    const CONTRACT_ADDRESS = "0xb196DeDdf0859006bc9aebF26c655Ee0C50E10a5"; // Ganti setelah deploy
-    const CONTRACT_ABI = [
-      {
-        "inputs": [
-          { "internalType": "string", "name": "_name", "type": "string" },
-          { "internalType": "uint256", "name": "_score", "type": "uint256" }
-        ],
-        "name": "addScore",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "inputs": [],
-        "name": "getTopPlayers",
-        "outputs": [
-          {
-            "components": [
-              { "internalType": "string", "name": "name", "type": "string" },
-              { "internalType": "uint256", "name": "score", "type": "uint256" }
-            ],
-            "internalType": "struct Leaderboard.Player[]",
-            "name": "",
-            "type": "tuple[]"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      }
-    ];
+  <div id="wallet">Wallet: Not Connected</div>
 
-    let provider, signer, contract, walletAddress;
+  <button id="connectBtn">Connect Wallet</button>
+  <button id="startBtn" disabled>Start Game</button>
+  <button id="submitBtn" disabled>Submit Score</button>
+  <button id="leaderboardBtn">Load Leaderboard</button>
 
-    async function connectWallet() {
-      if (window.ethereum) {
-        try {
-          const somniaChainId = "0xC509"; // ✅ Chain ID Somnia Shannon Testnet (50313)
-          const chainId = await ethereum.request({ method: "eth_chainId" });
+  <div id="gameArea"></div>
 
-          if (chainId !== somniaChainId) {
-            await ethereum.request({
-              method: "wallet_addEthereumChain",
-              params: [{
-                chainId: somniaChainId,
-                chainName: "Somnia Shannon Testnet",
-                rpcUrls: ["https://shannon-rpc.somnia.network"],
-                nativeCurrency: {
-                  name: "Somnia",
-                  symbol: "SOM",
-                  decimals: 18
-                },
-                blockExplorerUrls: ["https://shannon-explorer.somnia.network/"]
-              }]
-            });
-          }
+  <h2>🏆 Leaderboard</h2>
+  <div id="leaderboard">No data yet...</div>
 
-          await ethereum.request({ method: "eth_requestAccounts" });
-          provider = new ethers.providers.Web3Provider(window.ethereum);
-          signer = provider.getSigner();
-          contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-
-          walletAddress = await signer.getAddress();
-          document.getElementById("wallet").innerText = `Connected: ${walletAddress}`;
-          alert("✅ Connected to Somnia Shannon Testnet!");
-        } catch (error) {
-          console.error(error);
-          alert("❌ Connection failed!");
-        }
-      } else {
-        alert("⚠️ Please install MetaMask first!");
-      }
-    }
-
-    async function addScore() {
-      const name = prompt("Enter your name:");
-      const score = Math.floor(Math.random() * 1000);
-      try {
-        const tx = await contract.addScore(name, score);
-        await tx.wait();
-        alert(`🎯 Score ${score} added for ${name}!`);
-        loadLeaderboard();
-      } catch (err) {
-        console.error(err);
-        alert("Error adding score!");
-      }
-    }
-
-    async function loadLeaderboard() {
-      try {
-        const players = await contract.getTopPlayers();
-        const leaderboardDiv = document.getElementById("leaderboard");
-        leaderboardDiv.innerHTML = "<h3>🏆 Leaderboard 🏆</h3>";
-
-        players.forEach((p, i) => {
-          leaderboardDiv.innerHTML += `<p>${i + 1}. ${p.name} — ${p.score} pts</p>`;
-        });
-      } catch (err) {
-        console.error(err);
-      }
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
