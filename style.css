@@ -1,45 +1,57 @@
 body {
-  background: radial-gradient(circle, #1a001a, #000);
-  color: white;
-  font-family: 'Poppins', sans-serif;
-  text-align: center;
   margin: 0;
-  padding: 20px;
+  font-family: 'Poppins', sans-serif;
+  color: #fff;
+  background: radial-gradient(circle at top, #0a0a0a, #1a001a, #000);
+  text-align: center;
+  padding: 30px;
 }
 
 h1 {
-  color: #ff6600;
-  text-shadow: 0 0 10px #ff3300;
+  color: #ff8b00;
+  text-shadow: 0 0 20px #ff5e00, 0 0 40px #ff00ff;
 }
 
-#connectWallet {
-  padding: 10px 20px;
-  background-color: #ff6600;
+button {
+  background: linear-gradient(90deg, #ff00ff, #ff8b00);
   border: none;
+  padding: 12px 20px;
   border-radius: 10px;
+  color: #000;
   cursor: pointer;
-  color: white;
-  font-size: 16px;
-  box-shadow: 0 0 10px #ff3300;
+  font-weight: bold;
+  margin: 10px;
+  transition: 0.3s;
 }
 
-#pumpkinContainer {
-  margin-top: 20px;
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 15px;
+button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px #ff00ff;
+}
+
+#gameArea {
+  margin: 20px auto;
+  width: 90%;
+  max-width: 800px;
+  height: 400px;
+  border: 2px solid #ff00ff;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+#leaderboard {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #ff00ff;
+  margin-top: 30px;
 }
 
 .pumpkin {
-  width: 80px;
-  height: 80px;
-  background-image: url('https://i.imgur.com/mBkaXwA.png');
-  background-size: cover;
+  position: absolute;
   cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.pumpkin:hover {
-  transform: scale(1.1);
+  font-size: 30px;
+  user-select: none;
 }
