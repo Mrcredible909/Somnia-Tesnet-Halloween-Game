@@ -1,155 +1,89 @@
-const CONTRACT_ADDRESS = "0x9a710b33be7dEa1C0234B6F1Df33E876bae0A2FD"; // ganti dengan alamat kontrakmu
-const CONTRACT_ABI = [
-  {
-    "inputs": [
-      { "internalType": "string", "name": "_name", "type": "string" },
-      { "internalType": "uint256", "name": "_score", "type": "uint256" }
-    ],
-    "name": "addScore",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getLeaderboard",
-    "outputs": [
-      {
-        "components": [
-          { "internalType": "address", "name": "player", "type": "address" },
-          { "internalType": "string", "name": "name", "type": "string" },
-          { "internalType": "uint256", "name": "score", "type": "uint256" }
-        ],
-        "internalType": "struct Leaderboard.Player[]",
-        "name": "",
-        "type": "tuple[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  }
-];
-
 let provider, signer, contract;
-let walletAddress;
-let score = 0;
-let gameInterval = null;
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
 
-const somniaChainId = "0xC488"; // 50312 in hex
+let player = { x: 50, y: 300, score: 0 };
+let bullets = [];
+let enemies = [];
 
-// DOM elements
-const walletEl = document.getElementById("wallet");
-const gameArea = document.getElementById("gameArea");
-const leaderboardEl = document.getElementById("leaderboard");
+function draw() {
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, 800, 400);
 
-// Connect Wallet
-async function connectWallet() {
-  if (!window.ethereum) {
-    alert("Please install MetaMask first!");
-    return;
-  }
-  try {
-    const chainId = await ethereum.request({ method: "eth_chainId" });
+  ctx.fillStyle = "orange";
+  ctx.fillRect(player.x, player.y, 40, 40);
 
-    if (chainId !== somniaChainId) {
-      try {
-        await ethereum.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: somniaChainId }],
-        });
-      } catch (err) {
-        if (err.code === 4902) {
-          await ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [
-              {
-                chainId: somniaChainId,
-                chainName: "Somnia Testnet",
-                rpcUrls: ["https://dream-rpc.somnia.network/"],
-                nativeCurrency: { name: "Somnia Token", symbol: "STT", decimals: 18 },
-                blockExplorerUrls: ["https://shannon-explorer.somnia.network/"],
-              },
-            ],
-          });
-        }
+  ctx.fillStyle = "red";
+  for (let e of enemies) ctx.fillRect(e.x, e.y, 40, 40);
+
+  ctx.fillStyle = "yellow";
+  for (let b of bullets) ctx.fillRect(b.x, b.y, 10, 5);
+
+  ctx.fillStyle = "white";
+  ctx.fillText(`Score: ${player.score}`, 10, 20);
+}
+
+function update() {
+  bullets.forEach(b => b.x += 5);
+  enemies.forEach(e => e.x -= 2);
+
+  bullets.forEach(b => {
+    enemies.forEach((e, i) => {
+      if (b.x < e.x + 40 && b.x + 10 > e.x && b.y < e.y + 40 && b.y + 5 > e.y) {
+        enemies.splice(i, 1);
+        player.score += 10;
       }
-    }
+    });
+  });
 
-    await ethereum.request({ method: "eth_requestAccounts" });
+  enemies = enemies.filter(e => e.x > -50);
+  bullets = bullets.filter(b => b.x < 800);
+
+  if (Math.random() < 0.02) enemies.push({ x: 800, y: Math.random() * 300 + 50 });
+}
+
+function gameLoop() {
+  update();
+  draw();
+  requestAnimationFrame(gameLoop);
+}
+gameLoop();
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === " ") bullets.push({ x: player.x + 40, y: player.y + 20 });
+});
+
+document.getElementById("connectBtn").onclick = async () => {
+  if (window.ethereum) {
     provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
     signer = provider.getSigner();
     contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-    walletAddress = await signer.getAddress();
-    walletEl.innerText = "Connected: " + walletAddress;
-    document.getElementById("startBtn").disabled = false;
-    document.getElementById("submitBtn").disabled = false;
-  } catch (err) {
-    console.error(err);
-    alert("Failed to connect wallet");
+    alert("✅ Connected to Somnia wallet!");
   }
-}
+};
 
-// Start Game
-function startGame() {
-  score = 0;
-  gameArea.innerHTML = "";
-  if (gameInterval) clearInterval(gameInterval);
-
-  gameInterval = setInterval(() => spawnPumpkin(), 700);
-
-  setTimeout(() => {
-    clearInterval(gameInterval);
-    alert("Game over! Your score: " + score);
-  }, 10000);
-}
-
-// Spawn Pumpkin
-function spawnPumpkin() {
-  const pumpkin = document.createElement("div");
-  pumpkin.classList.add("pumpkin");
-  pumpkin.innerText = "🎃";
-  pumpkin.style.left = Math.random() * (gameArea.clientWidth - 40) + "px";
-  pumpkin.style.top = Math.random() * (gameArea.clientHeight - 40) + "px";
-  pumpkin.onclick = () => {
-    score++;
-    pumpkin.remove();
-  };
-  gameArea.appendChild(pumpkin);
-  setTimeout(() => pumpkin.remove(), 1000);
-}
-
-// Submit Score
 async function submitScore() {
+  if (!contract) return alert("Connect wallet first!");
   const name = prompt("Enter your player name:");
-  if (!name) return;
-  try {
-    const tx = await contract.addScore(name, score);
-    await tx.wait();
-    alert("Score submitted successfully!");
-  } catch (err) {
-    console.error(err);
-    alert("Error submitting score");
-  }
+  const tx = await contract.addScore(name, player.score);
+  await tx.wait();
+  alert("🎯 Score submitted!");
+  loadLeaderboard();
 }
 
-// Load Leaderboard
 async function loadLeaderboard() {
-  try {
-    const players = await contract.getLeaderboard();
-    leaderboardEl.innerHTML = "";
-    players.forEach((p, i) => {
-      const div = document.createElement("div");
-      div.textContent = `${i + 1}. ${p.name} — ${p.score} pts`;
-      leaderboardEl.appendChild(div);
-    });
-  } catch (err) {
-    console.error(err);
-    leaderboardEl.textContent = "Failed to load leaderboard";
-  }
+  const players = await contract.getTopPlayers();
+  const list = document.getElementById("leaderboard");
+  list.innerHTML = "";
+  players.forEach(p => {
+    const li = document.createElement("li");
+    li.textContent = `${p.name} - ${p.score} pts`;
+    list.appendChild(li);
+  });
 }
 
-// Event listeners
-document.getElementById("connectBtn").addEventListener("click", connectWallet);
-document.getElementById("startBtn").addEventListener("click", startGame);
-document.getElementById("submitBtn").addEventListener("click", submitScore);
-document.getElementById("leaderboardBtn").addEventListener("click", loadLeaderboard);
+// tekan Enter untuk kirim skor ke blockchain
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") submitScore();
+});
