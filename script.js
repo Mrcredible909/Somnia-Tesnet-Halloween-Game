@@ -1,4 +1,4 @@
-const CONTRACT_ADDRESS = "YOUR_CONTRACT_ADDRESS_HERE"; // ganti dengan alamat kontrakmu
+const CONTRACT_ADDRESS = "0x9a710b33be7dEa1C0234B6F1Df33E876bae0A2FD"; // ganti dengan alamat kontrakmu
 const CONTRACT_ABI = [
   {
     "inputs": [
