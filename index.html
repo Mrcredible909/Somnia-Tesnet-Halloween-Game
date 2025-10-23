@@ -1,195 +1,194 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Somnia Testnet Leaderboard</title>
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: radial-gradient(circle at top, #0a0a0a, #111, #000);
-      color: #fff;
-      text-align: center;
-      margin: 0;
-      padding: 40px;
-    }
-
-    h1 {
-      color: #ff00ff;
-      text-shadow: 0 0 10px #ff00ff, 0 0 25px #ff00ff;
-      font-size: 2.5em;
-    }
-
-    #wallet {
-      margin: 10px 0;
-      color: #00ffff;
-      font-weight: bold;
-    }
-
-    button {
-      background: linear-gradient(90deg, #ff00ff, #00ffff);
-      border: none;
-      padding: 12px 25px;
-      border-radius: 30px;
-      cursor: pointer;
-      color: #000;
-      font-size: 1em;
-      margin: 10px;
-      transition: all 0.3s;
-      font-weight: bold;
-      text-transform: uppercase;
-    }
-
-    button:hover {
-      transform: scale(1.08);
-      box-shadow: 0 0 20px #ff00ff;
-    }
-
-    #leaderboard {
-      margin-top: 30px;
-      padding: 20px;
-      border: 2px solid #ff00ff;
-      border-radius: 20px;
-      background: rgba(255, 255, 255, 0.05);
-      box-shadow: 0 0 30px #ff00ff44;
-    }
-
-    #leaderboard h3 {
-      color: #00ffff;
-      text-shadow: 0 0 10px #00ffff;
-    }
-
-    #leaderboard p {
-      font-size: 1.1em;
-      color: #fff;
-      margin: 5px 0;
-      text-shadow: 0 0 5px #ff00ff;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎃 Smash the Pumpkins — Halloween Game</title>
+<style>
+body {
+  background: radial-gradient(circle, #0a000a, #100010, #000);
+  font-family: 'Poppins', sans-serif;
+  color: #fff;
+  text-align: center;
+  overflow: hidden;
+}
+h1 {
+  text-shadow: 0 0 15px #ff00ff;
+}
+#gameArea {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  margin: 20px auto;
+  border: 2px solid #ff00ff;
+  border-radius: 20px;
+  overflow: hidden;
+}
+.pumpkin {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.pumpkin:hover {
+  transform: scale(1.1);
+}
+button {
+  background: linear-gradient(90deg, #ff00ff, #00ffff);
+  border: none;
+  border-radius: 30px;
+  padding: 10px 20px;
+  color: #000;
+  font-weight: bold;
+  margin: 10px;
+  cursor: pointer;
+}
+button:hover {
+  transform: scale(1.1);
+}
+#leaderboard {
+  margin-top: 30px;
+  padding: 20px;
+  border: 2px solid #ff00ff;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 30px #ff00ff44;
+}
+</style>
 </head>
 <body>
-  <h1>Somnia Testnet Leaderboard</h1>
-  <div id="wallet">Wallet not connected</div>
-  <button onclick="connectWallet()">Connect Wallet</button>
-  <button onclick="addScore()">Add Random Score</button>
-  <button onclick="loadLeaderboard()">Load Leaderboard</button>
 
-  <div id="leaderboard">
-    <h3>🏆 Leaderboard 🏆</h3>
-    <p>No data yet</p>
-  </div>
+<h1>🎃 Smash the Pumpkins 🎃</h1>
+<p id="wallet">Wallet not connected</p>
+<button onclick="connectWallet()">Connect Wallet</button>
+<button onclick="startGame()">Start Game</button>
+<button onclick="submitScore()">Submit Score</button>
+<div id="gameArea"></div>
 
-  <!-- Library Ethers.js -->
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
-  <script>
-    const CONTRACT_ADDRESS = "0x9a710b33be7dEa1C0234B6F1Df33E876bae0A2FD";
-    const CONTRACT_ABI = [
+<div id="leaderboard">
+  <h3>🏆 Leaderboard 🏆</h3>
+  <p>No data yet</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
+<script>
+const CONTRACT_ADDRESS = "0x6454Bb18d3161897905Ff9c662d74df06821C14F";
+const CONTRACT_ABI = [
+  {
+    "inputs": [
+      { "internalType": "string", "name": "_name", "type": "string" },
+      { "internalType": "uint256", "name": "_score", "type": "uint256" }
+    ],
+    "name": "submitScore",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getTopPlayers",
+    "outputs": [
       {
-        "inputs": [],
-        "stateMutability": "nonpayable",
-        "type": "constructor"
-      },
-      {
-        "inputs": [],
-        "name": "owner",
-        "outputs": [{"internalType": "address","name": "","type": "address"}],
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {"internalType": "string","name": "_name","type": "string"},
-          {"internalType": "uint256","name": "_score","type": "uint256"}
+        "components": [
+          { "internalType": "string", "name": "name", "type": "string" },
+          { "internalType": "uint256", "name": "score", "type": "uint256" }
         ],
-        "name": "addScore",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "inputs": [],
-        "name": "getTopPlayers",
-        "outputs": [
-          {
-            "components": [
-              {"internalType": "string","name": "name","type": "string"},
-              {"internalType": "uint256","name": "score","type": "uint256"}
-            ],
-            "internalType": "struct Leaderboard.Player[]",
-            "name": "",
-            "type": "tuple[]"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
+        "internalType": "struct HalloweenLeaderboard.Player[]",
+        "name": "",
+        "type": "tuple[]"
       }
-    ];
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
 
-    async function connectWallet() {
-      if (typeof window.ethereum === "undefined") {
-        alert("MetaMask not found. Please install it first!");
-        return;
-      }
+let provider, signer, contract, walletAddress;
+let score = 0;
+let gameActive = false;
 
-      const somniaChainId = "0xC4F8"; // 50312 in hex
-
-      try {
-        const chainId = await window.ethereum.request({ method: "eth_chainId" });
-        if (chainId !== somniaChainId) {
-          await window.ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [{
-              chainId: somniaChainId,
-              chainName: "Somnia Testnet",
-              rpcUrls: ["https://dream-rpc.somnia.network/"],
-              nativeCurrency: { name: "Somnia Test Token", symbol: "STT", decimals: 18 },
-              blockExplorerUrls: ["https://shannon-explorer.somnia.network/"]
-            }]
-          });
-        }
-
-        await window.ethereum.request({ method: "eth_requestAccounts" });
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const signer = provider.getSigner();
-        const wallet = await signer.getAddress();
-        document.getElementById("wallet").innerText = `Connected: ${wallet}`;
-        alert("Connected to Somnia Testnet!");
-      } catch (error) {
-        console.error(error);
-        alert("Failed to connect wallet");
-      }
-    }
-
-    async function addScore() {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-
-      const name = prompt("Enter your name:");
-      const score = Math.floor(Math.random() * 1000);
-
-      try {
-        const tx = await contract.addScore(name, score);
-        await tx.wait();
-        alert(`Score ${score} added for ${name}!`);
-        loadLeaderboard();
-      } catch (err) {
-        console.error(err);
-        alert("Error adding score!");
-      }
-    }
-
-    async function loadLeaderboard() {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
-      const players = await contract.getTopPlayers();
-      const leaderboardDiv = document.getElementById("leaderboard");
-      leaderboardDiv.innerHTML = "<h3>🏆 Leaderboard 🏆</h3>";
-
-      players.forEach((p, i) => {
-        leaderboardDiv.innerHTML += `<p>${i + 1}. ${p.name} — ${p.score}</p>`;
+async function connectWallet() {
+  if (!window.ethereum) return alert("Install MetaMask first!");
+  const somniaChainId = "0xC4F8"; // 50312
+  try {
+    const chainId = await ethereum.request({ method: "eth_chainId" });
+    if (chainId !== somniaChainId) {
+      await ethereum.request({
+        method: "wallet_addEthereumChain",
+        params: [{
+          chainId: somniaChainId,
+          chainName: "Somnia Testnet",
+          rpcUrls: ["https://dream-rpc.somnia.network/"],
+          nativeCurrency: { name: "STT", symbol: "STT", decimals: 18 },
+          blockExplorerUrls: ["https://shannon-explorer.somnia.network/"]
+        }]
       });
     }
-  </script>
+    await ethereum.request({ method: "eth_requestAccounts" });
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+    signer = provider.getSigner();
+    walletAddress = await signer.getAddress();
+    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+    document.getElementById("wallet").innerText = `Connected: ${walletAddress}`;
+    alert("Connected to Somnia Testnet!");
+  } catch (err) {
+    console.error(err);
+    alert("Failed to connect wallet");
+  }
+}
+
+function startGame() {
+  if (!walletAddress) return alert("Connect wallet first!");
+  score = 0;
+  gameActive = true;
+  const gameArea = document.getElementById("gameArea");
+  gameArea.innerHTML = "";
+  spawnPumpkin();
+}
+
+function spawnPumpkin() {
+  if (!gameActive) return;
+  const gameArea = document.getElementById("gameArea");
+  const pumpkin = document.createElement("img");
+  pumpkin.src = "https://i.imgur.com/TuD8w6C.png";
+  pumpkin.classList.add("pumpkin");
+  pumpkin.style.left = Math.random() * (gameArea.clientWidth - 80) + "px";
+  pumpkin.style.top = Math.random() * (gameArea.clientHeight - 80) + "px";
+  pumpkin.onclick = () => {
+    score += 10;
+    pumpkin.remove();
+    spawnPumpkin();
+  };
+  gameArea.appendChild(pumpkin);
+  setTimeout(() => {
+    if (pumpkin.parentElement) pumpkin.remove();
+    spawnPumpkin();
+  }, 1500);
+}
+
+async function submitScore() {
+  const name = prompt("Enter your name:");
+  if (!name) return;
+  try {
+    const tx = await contract.submitScore(name, score);
+    await tx.wait();
+    alert(`Score ${score} submitted for ${name}!`);
+    loadLeaderboard();
+  } catch (err) {
+    console.error(err);
+    alert("Error submitting score!");
+  }
+}
+
+async function loadLeaderboard() {
+  const players = await contract.getTopPlayers();
+  const board = document.getElementById("leaderboard");
+  board.innerHTML = "<h3>🏆 Leaderboard 🏆</h3>";
+  players.forEach((p, i) => {
+    board.innerHTML += `<p>${i + 1}. ${p.name} — ${p.score}</p>`;
+  });
+}
+</script>
 </body>
 </html>
