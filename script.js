@@ -1,20 +1,10 @@
-const CONTRACT_ADDRESS = "0x3294F61bD0B422EFAabB1a00A9d2857FFa409919";
+const CONTRACT_ADDRESS = "YOUR_CONTRACT_ADDRESS_HERE"; // ganti dengan alamat kontrakmu
 const CONTRACT_ABI = [
   {
-    "inputs": [],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
-    "inputs": [],
-    "name": "owner",
-    "outputs": [{"internalType": "address", "name": "", "type": "address"}],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [{"internalType": "string","name": "_name","type": "string"},
-               {"internalType": "uint256","name": "_score","type": "uint256"}],
+    "inputs": [
+      { "internalType": "string", "name": "_name", "type": "string" },
+      { "internalType": "uint256", "name": "_score", "type": "uint256" }
+    ],
     "name": "addScore",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -22,12 +12,13 @@ const CONTRACT_ABI = [
   },
   {
     "inputs": [],
-    "name": "getTopPlayers",
+    "name": "getLeaderboard",
     "outputs": [
       {
         "components": [
-          {"internalType": "string", "name": "name", "type": "string"},
-          {"internalType": "uint256", "name": "score", "type": "uint256"}
+          { "internalType": "address", "name": "player", "type": "address" },
+          { "internalType": "string", "name": "name", "type": "string" },
+          { "internalType": "uint256", "name": "score", "type": "uint256" }
         ],
         "internalType": "struct Leaderboard.Player[]",
         "name": "",
@@ -39,68 +30,126 @@ const CONTRACT_ABI = [
   }
 ];
 
-let provider;
-let signer;
-let contract;
+let provider, signer, contract;
 let walletAddress;
+let score = 0;
+let gameInterval = null;
 
+const somniaChainId = "0xC488"; // 50312 in hex
+
+// DOM elements
+const walletEl = document.getElementById("wallet");
+const gameArea = document.getElementById("gameArea");
+const leaderboardEl = document.getElementById("leaderboard");
+
+// Connect Wallet
 async function connectWallet() {
-  if (window.ethereum) {
-    try {
-      const somniaChainId = "0xC509"; // 50341 in hex
-      const chainId = await ethereum.request({ method: "eth_chainId" });
+  if (!window.ethereum) {
+    alert("Please install MetaMask first!");
+    return;
+  }
+  try {
+    const chainId = await ethereum.request({ method: "eth_chainId" });
 
-      if (chainId !== somniaChainId) {
+    if (chainId !== somniaChainId) {
+      try {
         await ethereum.request({
           method: "wallet_switchEthereumChain",
           params: [{ chainId: somniaChainId }],
         });
+      } catch (err) {
+        if (err.code === 4902) {
+          await ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [
+              {
+                chainId: somniaChainId,
+                chainName: "Somnia Testnet",
+                rpcUrls: ["https://dream-rpc.somnia.network/"],
+                nativeCurrency: { name: "Somnia Token", symbol: "STT", decimals: 18 },
+                blockExplorerUrls: ["https://shannon-explorer.somnia.network/"],
+              },
+            ],
+          });
+        }
       }
-
-      await ethereum.request({ method: "eth_requestAccounts" });
-      provider = new ethers.providers.Web3Provider(window.ethereum);
-      signer = provider.getSigner();
-      contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-
-      walletAddress = await signer.getAddress();
-      document.getElementById("wallet").innerText = `Connected: ${walletAddress}`;
-
-      alert("Wallet connected to Somnia Shannon Testnet!");
-    } catch (error) {
-      console.error(error);
-      alert("Connection failed!");
     }
-  } else {
-    alert("MetaMask not found. Please install it first!");
+
+    await ethereum.request({ method: "eth_requestAccounts" });
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+    signer = provider.getSigner();
+    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+    walletAddress = await signer.getAddress();
+    walletEl.innerText = "Connected: " + walletAddress;
+    document.getElementById("startBtn").disabled = false;
+    document.getElementById("submitBtn").disabled = false;
+  } catch (err) {
+    console.error(err);
+    alert("Failed to connect wallet");
   }
 }
 
-async function addScore() {
-  const name = prompt("Enter your name:");
-  const score = Math.floor(Math.random() * 1000); // random score
+// Start Game
+function startGame() {
+  score = 0;
+  gameArea.innerHTML = "";
+  if (gameInterval) clearInterval(gameInterval);
+
+  gameInterval = setInterval(() => spawnPumpkin(), 700);
+
+  setTimeout(() => {
+    clearInterval(gameInterval);
+    alert("Game over! Your score: " + score);
+  }, 10000);
+}
+
+// Spawn Pumpkin
+function spawnPumpkin() {
+  const pumpkin = document.createElement("div");
+  pumpkin.classList.add("pumpkin");
+  pumpkin.innerText = "🎃";
+  pumpkin.style.left = Math.random() * (gameArea.clientWidth - 40) + "px";
+  pumpkin.style.top = Math.random() * (gameArea.clientHeight - 40) + "px";
+  pumpkin.onclick = () => {
+    score++;
+    pumpkin.remove();
+  };
+  gameArea.appendChild(pumpkin);
+  setTimeout(() => pumpkin.remove(), 1000);
+}
+
+// Submit Score
+async function submitScore() {
+  const name = prompt("Enter your player name:");
+  if (!name) return;
   try {
     const tx = await contract.addScore(name, score);
     await tx.wait();
-    alert(`Score ${score} added for ${name}!`);
-    loadLeaderboard();
+    alert("Score submitted successfully!");
   } catch (err) {
     console.error(err);
-    alert("Error adding score!");
+    alert("Error submitting score");
   }
 }
 
+// Load Leaderboard
 async function loadLeaderboard() {
   try {
-    const players = await contract.getTopPlayers();
-    const leaderboardDiv = document.getElementById("leaderboard");
-    leaderboardDiv.innerHTML = "<h3>🏆 Leaderboard 🏆</h3>";
-
+    const players = await contract.getLeaderboard();
+    leaderboardEl.innerHTML = "";
     players.forEach((p, i) => {
-      leaderboardDiv.innerHTML += `<p>${i + 1}. ${p.name} — ${p.score}</p>`;
+      const div = document.createElement("div");
+      div.textContent = `${i + 1}. ${p.name} — ${p.score} pts`;
+      leaderboardEl.appendChild(div);
     });
   } catch (err) {
     console.error(err);
+    leaderboardEl.textContent = "Failed to load leaderboard";
   }
 }
 
-
+// Event listeners
+document.getElementById("connectBtn").addEventListener("click", connectWallet);
+document.getElementById("startBtn").addEventListener("click", startGame);
+document.getElementById("submitBtn").addEventListener("click", submitScore);
+document.getElementById("leaderboardBtn").addEventListener("click", loadLeaderboard);
