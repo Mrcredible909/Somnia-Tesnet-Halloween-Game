@@ -1,40 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Somnia Halloween Shooter</title>
-  <link rel="stylesheet" href="style.css" />
-  <!-- ethers v5 for wide compatibility -->
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
-  <script src="contract.js"></script>
+  <meta charset="UTF-8">
+  <title>🎃 Somnia Halloween Shooter 🎃</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>🎃 Somnia Halloween Shooter</h1>
-    <p class="sub">Connect your wallet (Somnia Testnet), play, and save score on-chain.</p>
-    <div id="controls">
-      <button id="btnConnect">Connect Wallet</button>
-      <button id="btnStart" disabled>Start Game</button>
-      <button id="btnSubmit" disabled>Submit Score</button>
-      <button id="btnLoad">Load Leaderboard</button>
-      <div id="walletInfo">Wallet: Not connected</div>
+  <div class="container">
+    <h1>🎃 Somnia Halloween Shooter 🎃</h1>
+    <p>Connect your wallet and submit your score to the blockchain!</p>
+
+    <button id="connectBtn">🕸️ Connect Wallet</button>
+
+    <div id="gameArea">
+      <button id="shootBtn">🔫 SHOOT!</button>
+      <p id="score">Score: 0</p>
+      <button id="submitScoreBtn">Submit Score</button>
     </div>
-  </header>
 
-  <main>
-    <canvas id="gameCanvas" width="900" height="420"></canvas>
+    <h3>Top Players</h3>
+    <ul id="leaderboard"></ul>
+  </div>
 
-    <section id="leaderboard">
-      <h2>🏆 On-Chain Leaderboard</h2>
-      <div id="board">No data yet</div>
-    </section>
-  </main>
+  <!-- 🧩 CDN ethers.js harus dimuat dulu -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
-  <footer>
-    <small>Somnia Testnet — Chain ID 50312</small>
-  </footer>
-
-  <script src="script.js"></script>
+  <!-- 🕹️ Baru load script game -->
+  <script src="app.js"></script>
 </body>
 </html>
