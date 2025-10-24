@@ -1,6 +1,6 @@
 // contract.js
 // Put your contract address here (replace the placeholder)
-const CONTRACT_ADDRESS = "REPLACE_WITH_YOUR_CONTRACT_ADDRESS";
+const CONTRACT_ADDRESS = "0x327C66Fecd146CdFD18BA1da76e58eF8D09de18a";
 
 // ABI for the HalloweenLeaderboard contract
 const CONTRACT_ABI = [
