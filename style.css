@@ -1,29 +1,27 @@
 body {
-  background: url('https://i.ibb.co/ZKd6phG/halloween-bg.jpg') no-repeat center center fixed;
-  background-size: cover;
-  font-family: 'Press Start 2P', cursive;
-  color: #ffae00;
+  background: linear-gradient(135deg, #000, #200030);
+  font-family: 'Poppins', sans-serif;
+  color: #fff;
   text-align: center;
-  margin: 0;
   padding: 40px;
 }
 
 .container {
-  background: rgba(0, 0, 0, 0.8);
-  border: 3px solid #ff6600;
-  border-radius: 20px;
-  padding: 30px;
   max-width: 600px;
   margin: auto;
+  background: rgba(30, 0, 40, 0.9);
+  border: 2px solid #ff6600;
+  border-radius: 15px;
+  padding: 30px;
   box-shadow: 0 0 30px #ff3300;
 }
 
 button {
   background: #ff6600;
   border: none;
-  color: white;
+  color: #fff;
   font-size: 16px;
-  padding: 10px 20px;
+  padding: 12px 25px;
   margin: 10px;
   cursor: pointer;
   border-radius: 8px;
@@ -38,5 +36,4 @@ button:hover {
 #leaderboard {
   list-style: none;
   padding: 0;
-  text-align: left;
 }
