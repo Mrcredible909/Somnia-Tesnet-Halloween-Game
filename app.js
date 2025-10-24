@@ -1,64 +1,77 @@
 let provider, signer, contract;
 let score = 0;
 
-// 🧠 Connect Wallet
-document.getElementById("connectBtn").onclick = async () => {
-  if (!window.ethereum) {
+// tombol connect wallet
+const connectBtn = document.getElementById("connectBtn");
+const shootBtn = document.getElementById("shootBtn");
+const submitBtn = document.getElementById("submitScoreBtn");
+const leaderboardList = document.getElementById("leaderboard");
+
+// koneksi wallet
+connectBtn.onclick = async () => {
+  if (typeof window.ethereum === "undefined") {
     alert("Install MetaMask dulu!");
     return;
   }
 
-  provider = new ethers.providers.Web3Provider(window.ethereum);
-  await provider.send("eth_requestAccounts", []);
-  signer = provider.getSigner();
+  try {
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    signer = provider.getSigner();
 
-  const network = await provider.getNetwork();
-  if (network.chainId !== 50312) {
-    alert("Please switch to Somnia Testnet (Chain ID 50312)");
-    return;
+    const network = await provider.getNetwork();
+    if (network.chainId !== 50312) {
+      alert("Switch dulu ke Somnia Testnet (Chain ID: 50312)");
+      return;
+    }
+
+    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+    document.getElementById("gameArea").style.display = "block";
+    alert("Wallet connected ke Somnia Testnet 🎃");
+  } catch (err) {
+    console.error(err);
+    alert("Gagal konek ke wallet");
   }
-
-  contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-  document.getElementById("gameArea").style.display = "block";
-  alert("Wallet connected to Somnia Testnet 🎃");
 };
 
-// 🔫 Game Logic
-document.getElementById("shootBtn").onclick = () => {
-  const damage = Math.floor(Math.random() * 15) + 1;
-  score += damage;
+// tombol shoot
+shootBtn.onclick = () => {
+  score += Math.floor(Math.random() * 15) + 1;
   document.getElementById("score").innerText = `Score: ${score}`;
 };
 
-// 🎯 Submit Score
-document.getElementById("submitScoreBtn").onclick = async () => {
+// kirim skor ke kontrak
+submitBtn.onclick = async () => {
   if (!contract) {
-    alert("Connect wallet dulu!");
+    alert("Hubungkan wallet dulu!");
     return;
   }
 
-  const name = prompt("Masukkan nama pemain:");
+  const name = prompt("Masukkan nama kamu:");
   if (!name) return;
 
   try {
     const tx = await contract.addScore(name, score);
     await tx.wait();
-    alert("Score submitted ke blockchain!");
-    getLeaderboard();
+    alert(`Score ${score} dikirim ke blockchain!`);
+    await loadLeaderboard();
   } catch (err) {
-    alert("Gagal kirim score: " + err.message);
+    console.error(err);
+    alert("Gagal kirim skor: " + err.message);
   }
 };
 
-// 🏆 Get Leaderboard
-async function getLeaderboard() {
-  if (!contract) return;
-  const players = await contract.getTopPlayers();
-  const list = document.getElementById("leaderboard");
-  list.innerHTML = "";
-  players.forEach(p => {
-    const li = document.createElement("li");
-    li.textContent = `${p.name}: ${p.score}`;
-    list.appendChild(li);
-  });
+// leaderboard
+async function loadLeaderboard() {
+  try {
+    const players = await contract.getTopPlayers();
+    leaderboardList.innerHTML = "";
+    players.forEach((p, i) => {
+      const li = document.createElement("li");
+      li.textContent = `${i + 1}. ${p.name} - ${p.score}`;
+      leaderboardList.appendChild(li);
+    });
+  } catch (err) {
+    console.error(err);
+  }
 }
