@@ -8,24 +8,27 @@
 <body>
   <div class="container">
     <h1>🎃 Somnia Halloween Shooter 🎃</h1>
-    <p>Connect your wallet and submit your score to the blockchain!</p>
+    <p>Connect wallet on <b>Somnia Testnet</b> and fight Halloween monsters!</p>
 
     <button id="connectBtn">🕸️ Connect Wallet</button>
 
-    <div id="gameArea">
+    <div id="gameArea" style="display:none;">
       <button id="shootBtn">🔫 SHOOT!</button>
       <p id="score">Score: 0</p>
-      <button id="submitScoreBtn">Submit Score</button>
+      <button id="submitScoreBtn">🎯 Submit Score</button>
     </div>
 
-    <h3>Top Players</h3>
+    <h3>🏆 Top Players</h3>
     <ul id="leaderboard"></ul>
   </div>
 
-  <!-- 🧩 CDN ethers.js harus dimuat dulu -->
+  <!-- ✅ load ethers.js dari CDN -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
-  <!-- 🕹️ Baru load script game -->
+  <!-- ✅ load contract.js dulu -->
+  <script src="contract.js"></script>
+
+  <!-- ✅ lalu app.js terakhir -->
   <script src="app.js"></script>
 </body>
 </html>
