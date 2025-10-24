@@ -1,11 +1,8 @@
 let provider, signer, contract;
 let score = 0;
 
-// 👉 GANTI DENGAN ADDRESS KONTRAK KAMU
-const CONTRACT_ADDRESS = "0x327C66Fecd146CdFD18BA1da76e58eF8D09de18a";
-
-// 👉 GANTI DENGAN ABI DARI KONTRAK KAMU (copy dari Remix)
-const CONTRACT_ABI = 0x327C66Fecd146CdFD18BA1da76e58eF8D09de18a
+const CONTRACT_ADDRESS = "0x327C66Fecd146CdFD18BA1da76e58eF8D09de18a"; // Ganti dengan kontrakmu
+const CONTRACT_ABI = [
   {
     "inputs":[{"internalType":"string","name":"_name","type":"string"},{"internalType":"uint256","name":"_score","type":"uint256"}],
     "name":"addScore","outputs":[],"stateMutability":"nonpayable","type":"function"
@@ -15,44 +12,66 @@ const CONTRACT_ABI = 0x327C66Fecd146CdFD18BA1da76e58eF8D09de18a
   }
 ];
 
-// 🔗 Connect Wallet
+// 🦊 Connect Wallet
 async function connectWallet() {
-  if (!window.ethereum) return alert("Install MetaMask!");
-  provider = new ethers.BrowserProvider(window.ethereum);
-  await provider.send("eth_requestAccounts", []);
-  signer = await provider.getSigner();
-  contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-  alert("Wallet connected!");
+  if (!window.ethereum) {
+    alert("Please install MetaMask!");
+    return;
+  }
+
+  try {
+    await window.ethereum.request({ method: "eth_requestAccounts" });
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+    signer = provider.getSigner();
+    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+    alert("Wallet connected successfully!");
+  } catch (err) {
+    console.error("Connection failed:", err);
+    alert("Connection failed: " + err.message);
+  }
 }
 
 document.getElementById("connectBtn").onclick = connectWallet;
 
-// 🔫 Tembak musuh (nambah score)
+// 🔫 Shoot button
 document.getElementById("shootBtn").onclick = () => {
   score += Math.floor(Math.random() * 10) + 1;
   document.getElementById("score").innerText = "Score: " + score;
 };
 
-// 📤 Submit skor ke blockchain
+// 📤 Submit Score
 document.getElementById("submitScoreBtn").onclick = async () => {
-  if (!contract) return alert("Connect wallet first!");
+  if (!contract) {
+    alert("Please connect your wallet first!");
+    return;
+  }
+
   const name = prompt("Enter your player name:");
   if (!name) return;
-  const tx = await contract.addScore(name, score);
-  await tx.wait();
-  alert("Score submitted!");
-  getLeaderboard();
+
+  try {
+    const tx = await contract.addScore(name, score);
+    await tx.wait();
+    alert("Score submitted successfully!");
+    getLeaderboard();
+  } catch (err) {
+    alert("Transaction failed: " + err.message);
+  }
 };
 
-// 🏆 Ambil leaderboard
+// 🏆 Load leaderboard
 async function getLeaderboard() {
   if (!contract) return;
-  const players = await contract.getTopPlayers();
-  const list = document.getElementById("leaderboard");
-  list.innerHTML = "";
-  players.forEach(p => {
-    const li = document.createElement("li");
-    li.textContent = `${p.name}: ${p.score}`;
-    list.appendChild(li);
-  });
+  try {
+    const players = await contract.getTopPlayers();
+    const list = document.getElementById("leaderboard");
+    list.innerHTML = "";
+    players.forEach(p => {
+      const li = document.createElement("li");
+      li.textContent = `${p.name}: ${p.score}`;
+      list.appendChild(li);
+    });
+  } catch (err) {
+    console.error(err);
+  }
 }
