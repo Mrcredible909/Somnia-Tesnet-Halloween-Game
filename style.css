@@ -1,45 +1,42 @@
-/* style.css */
-:root{
-  --bg:#0b0210;
-  --panel:#0f0611;
-  --accent:#ff6a00;
-  --neon:#ff00ff;
-  --muted:#cfc9d6;
+body {
+  background: url('https://i.ibb.co/ZKd6phG/halloween-bg.jpg') no-repeat center center fixed;
+  background-size: cover;
+  font-family: 'Press Start 2P', cursive;
+  color: #ffae00;
+  text-align: center;
+  margin: 0;
+  padding: 40px;
 }
-*{box-sizing:border-box}
-body{
-  margin:0;
-  background: radial-gradient(circle at top left, #12001a 0%, #0b0210 35%, #070007 100%);
-  color:var(--muted);
-  font-family:Inter, Poppins, system-ui, Arial;
-  text-align:center;
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-}
-header{padding:22px;}
-h1{
-  color:var(--accent);
-  text-shadow:0 0 18px var(--neon);
-  margin:0 0 6px;
-}
-.sub{opacity:.85;margin:6px 0 12px}
 
-#controls{
-  display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:14px;
+.container {
+  background: rgba(0, 0, 0, 0.8);
+  border: 3px solid #ff6600;
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 600px;
+  margin: auto;
+  box-shadow: 0 0 30px #ff3300;
 }
-button{
-  background:linear-gradient(90deg,var(--accent),var(--neon));
-  border:none;padding:10px 16px;border-radius:14px;cursor:pointer;font-weight:700;color:#000;
-  box-shadow:0 6px 20px rgba(0,0,0,.5);
+
+button {
+  background: #ff6600;
+  border: none;
+  color: white;
+  font-size: 16px;
+  padding: 10px 20px;
+  margin: 10px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.3s;
 }
-button:disabled{opacity:.5;transform:none;cursor:not-allowed}
-#walletInfo{margin-left:12px;font-size:.95rem}
 
-main{width:100%;max-width:1100px;padding:6px 18px 40px;}
-canvas{display:block;margin:0 auto;border:2px solid rgba(255,106,0,.15);background:#000;border-radius:6px}
+button:hover {
+  background: #ff3300;
+  transform: scale(1.1);
+}
 
-#leaderboard{margin-top:18px;background:rgba(255,255,255,0.02);padding:12px;border-radius:10px;border:1px solid rgba(255,0,255,0.06)}
-#board{min-height:44px;text-align:left;padding:6px;color:#fff}
-footer{margin-top:auto;padding:18px;color:#9e9aa6}
+#leaderboard {
+  list-style: none;
+  padding: 0;
+  text-align: left;
+}
