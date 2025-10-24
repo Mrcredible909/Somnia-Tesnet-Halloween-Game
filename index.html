@@ -8,7 +8,7 @@
 <body>
   <div class="container">
     <h1>🎃 Somnia Halloween Shooter 🎃</h1>
-    <p>Connect wallet on <b>Somnia Testnet</b> and fight Halloween monsters!</p>
+    <p>Connect your wallet on <b>Somnia Testnet</b> and shoot monsters to earn score!</p>
 
     <button id="connectBtn">🕸️ Connect Wallet</button>
 
@@ -18,17 +18,14 @@
       <button id="submitScoreBtn">🎯 Submit Score</button>
     </div>
 
-    <h3>🏆 Top Players</h3>
+    <h3>🏆 Leaderboard</h3>
     <ul id="leaderboard"></ul>
   </div>
 
-  <!-- ✅ load ethers.js dari CDN -->
+  <!-- Load library ethers.js DULU -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-
-  <!-- ✅ load contract.js dulu -->
+  <!-- Load contract dan app setelahnya -->
   <script src="contract.js"></script>
-
-  <!-- ✅ lalu app.js terakhir -->
   <script src="app.js"></script>
 </body>
 </html>
